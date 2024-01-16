@@ -1,0 +1,252 @@
+
+{% load static %}  <!-- Add this line at the top of your template -->
+
+
+
+<!DOCTYPE>
+
+<html>
+
+  <head>
+    <title>cytoscape-dagre.js demo</title>
+
+    <!-- name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1"> -->
+
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+    <!-- for testing with local version of cytoscape.js -->
+    <!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
+    
+    <script src="https://unpkg.com/dagre@0.7.4/dist/dagre.js"></script>
+    <script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>   <!-- Load cytoscape-dagre -->
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    
+
+    
+
+
+    <style>
+        body {
+            font-family: helvetica;
+            font-size: 14px;
+            
+            
+        }
+
+        #container {
+            display: flex;
+            flex-direction: row; /* Arrange elements horizontally */
+            height: 50vh; /* Full viewport height */
+        }
+
+        #cy {
+            flex: 1; /* Grow to fill available space */
+            border: 2px solid #000; /* Add a 2px solid black border */
+            padding: 10px; /* Add padding inside the div */
+        }
+
+        #bar-chart-container {
+            display: flex;
+            flex-direction: column; /* Arrange elements vertically */
+            flex: 1; /* Grow to fill available space */
+        }
+
+        #modelDiv, #myDiv {
+            flex: 1; /* Grow to fill available space */
+        }
+
+        h1 {
+            opacity: 1;
+            font-size: 18px;
+            width: 100%;
+            text-align: center; /* Center-align the title */
+            margin: 10; /* Remove margin to prevent spacing */
+        }
+
+        /* Style for buttons */
+        .button-container {
+            display: flex;
+            flex-direction: column; /* Arrange buttons vertically */
+            align-items: center; /* Center-align buttons horizontally */
+            margin: 20px 0; /* Add margin at the top and bottom */
+        }
+
+        .button {
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 10px; /* Add space between buttons */
+        }
+    </style>
+
+    <script>
+      window.addEventListener('DOMContentLoaded', function(){
+
+        var cy = window.cy = cytoscape({
+          container: document.getElementById('cy'),
+
+          boxSelectionEnabled: false,
+          autounselectify: true,
+
+          layout: {
+            name: 'dagre'
+          },
+
+          style: [
+            {
+              selector: 'node',
+
+              style: {
+                'background-color': '#11479e',
+                'shape': 'roundrectangle',
+                'border-width': '2px',
+                'border-color': '#ffffff',
+                'text-valign': 'center',
+                'text-halign': 'center',
+                'font-size': '12px',     // Adjust the font size as needed
+                'color': '#ffffff',
+                'text-wrap': 'wrap',
+                'text-max-width': '190px',
+                'min-width': '80px',     /* Minimum width */
+                'max-width': '200px',    /* Maximum width */
+                'width': 'label',
+                'height': '40px',
+                'label': 'data(name)'
+              }
+            },
+
+            {
+              selector: 'edge',
+              style: {
+                'width': 4, // Set the edge width
+                'line-color': '#9dbaea', // Set the edge line color
+                'target-arrow-shape': 'triangle', // Set the arrow shape
+                'target-arrow-color': '#9dbaea', // Set the arrow color
+                'curve-style': 'bezier', // Set the curve style
+                'label': 'data(value)', // Show edge value as label
+                'font-size': 12, // Set the font size of the label
+                'color': '#000000' // Label text color
+    
+              }
+            }
+          ],
+
+          elements: {
+            nodes: [
+              { data: { id: 'n0', name: 'Gender'} },
+              { data: { id: 'n1', name: 'Race'} },
+              { data: { id: 'n2', name: 'Age'} },
+              { data: { id: 'n3', name: 'Work Experience'} },
+              { data: { id: 'n4', name: 'Major'} },
+              { data: { id: 'n5', name: 'Grade Point Average'} },
+              { data: { id: 'n6', name: 'SAT score	'} },
+              { data: { id: 'n7', name: 'College Rank'} },
+              { data: { id: 'n8', name: 'Job'} },
+
+              
+            ],
+            edges: [
+              { data: { source: 'n0', target: 'n4'} },
+              { data: { source: 'n4', target: 'n0'} },
+              { data: { source: 'n4', target: 'n8', value: '2.94' } },
+              { data: { source: 'n0', target: 'n8', value: '1.36' } },
+              { data: { source: 'n2', target: 'n3', value: '1' } },
+              { data: { source: 'n3', target: 'n8', value: '1.11' } },
+              { data: { source: 'n5', target: 'n8', value: '0.72' } },
+              { data: { source: 'n1', target: 'n7', value: '0.52' } },
+              { data: { source: 'n6', target: 'n7', value: '1.01' } },
+              { data: { source: 'n7', target: 'n8', value: '1.48' } },
+              
+             
+            ]
+          }
+        });
+
+        // Calculate the width of the label text
+        cy.nodes().forEach(function(node) {
+            const label = node.data('name');
+            const labelWidth = label.length * 8; // Adjust the multiplier based on font size and style
+        
+            // Ensure the calculated width is within the allowed range
+            if (labelWidth < 80) {
+            node.style('width', '80px'); // Set to minimum width
+            } else if (labelWidth > 200) {
+            node.style('width', '200px'); // Set to maximum width
+            } else {
+            node.style('width', labelWidth + 'px'); // Set to calculated width
+            }
+        });
+
+        
+        // Plotly Model Metrics bar chart code
+        var model_bar1 = {
+            x: [0.7, 0.7],
+            y: ['Accuracy', 'F1 Score'],
+            name: 'Debiased',
+            type: 'bar',
+            orientation: 'h'
+        };
+
+        var model_bar2 = {
+            x: [0.8, 0.8],
+            y: ['Accuracy', 'F1 Score'],
+            name: 'Baseline',
+            type: 'bar',
+            orientation: 'h'
+        };
+
+        var model_data = [model_bar1, model_bar2];
+
+        var model_layout = {
+            title: 'Model Metrics',
+            barmode: 'group'
+        };
+
+        Plotly.newPlot('modelDiv', model_data, model_layout);
+
+        // Plotly Bias Metricsbar chart code
+        var trace1 = {
+            x: ['Parity Diff', 'Ind diff', 'Accuracy diff', 'FNR diff', 'FPR diff'],
+            y: [11.5, 19, 0.4, 6.5, 2],
+            name: 'Baseline',
+            type: 'bar'
+          };
+          
+          var trace2 = {
+            x: ['Parity Diff', 'Ind diff', 'Accuracy diff', 'FNR diff', 'FPR diff'],
+            y: [10, 18, 0.4, 6,1.5],
+            name: 'Debiased',
+            type: 'bar'
+          };
+          
+          var data = [trace1, trace2];
+          
+          var layout = {barmode: 'group'};
+          
+          Plotly.newPlot('myDiv', data, layout);
+  
+
+      });
+    </script>
+  </head>
+
+  <body>
+    <h1>cytoscape-dagre demo</h1>
+    <div id="container">
+        <!-- Cytoscape-Dagre visualization container -->
+        <div id="cy"></div>
+        <div id="bar-chart-container">
+            <!-- Bar chart canvas -->
+            <div id='modelDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
+            <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
+        </div>
+    </div>
+
+    <div class="button-container">
+        <button class="button">Casual Model</button>
+        <button class="button">Debiased dataset</button>
+    </div>
+
+    
+</body>
+
+</html>

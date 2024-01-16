@@ -1,0 +1,87 @@
+{% load static %}  <!-- Add this line at the top of your template -->
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <!-- Required Meta Tag -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <!-- Bootstrap CSS  -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+        <script src="https://kit.fontawesome.com/0990d8b4a5.js" crossorigin="anonymous"></script>
+        <!--Get your own code at fontawesome.com-->
+
+        <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+    <!-- for testing with local version of cytoscape.js -->
+    <!--<script src="../cytoscape.js/build/cytoscape.js"></>-->
+    
+    <script src="https://unpkg.com/dagre@0.7.4/dist/dagre.js"></script>
+    <script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>   <!-- Load cytoscape-dagre -->
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+
+    <!-- JavaScript for making the AJAX request -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+        <style>
+           
+    
+            #cy {
+                
+                border: 2px solid #000; /* Add a 2px solid black border */
+                padding: 10px; /* Add padding inside the div */
+                width: 100%; /* Adjust as needed */
+                height: 400px; /* Adjust as needed */
+            }
+    
+            .list-group{
+                max-height: 250px;
+                margin-bottom: 10px;
+                overflow:scroll;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            
+    
+            #mlMetricsDiv, #dataDistortionDiv {
+                display: flex;
+                flex: 1; /* Grow to fill available space */
+                flex-direction: column; /* Arrange elements vertically */
+                max-height: 200px;
+            }
+
+        </style>
+    
+        
+        <title>{% block title %} {% endblock %}</title>
+
+    </head>
+    <body>
+        {% include 'partials/nav.html' %}
+        
+        
+        <div class="container-fluid">
+            {% block content %}
+            
+            {% endblock %}
+            
+            <script>
+                var edgeMatrix = {{ edge_matrix|safe }};
+                var edgeWeightMatrix = {{ edge_weight_matrix|safe }};
+                var columnNames = {{ column_names|safe }};
+            </script>
+            
+            <script type="module" src="{% static 'js/left_panel.js' %}"></script>
+            <script type="module" src="{% static 'js/dag.js' %}"></script>
+            <script type="module" src="{% static 'js/edge_operations.js' %}"></script>
+            <script type="module" src="{% static 'js/right_panel.js' %}"></script>
+
+        </div>
+
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></>
+        
+            
+    </body>
+</html>

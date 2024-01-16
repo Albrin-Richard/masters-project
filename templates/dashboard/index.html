@@ -1,0 +1,209 @@
+{% extends 'partials/base.html' %}
+
+{% block title %} Dashboard {% endblock %}
+
+{% block content %} 
+
+<div class="row">
+        
+    <!-- Left Column -->
+    <div class="col-md-2">
+        <div class="border p-3 shadow-sm">
+
+            <div class="mb-3  text-center" >
+            
+                <h5 class="mb-3">Dataset</h5>
+            
+                <form method="POST">
+                    <select class="mb-3 form-select" aria-label="Default select example">
+                        
+                        <option value="1">Hiring</option>
+                        <option value="2">Adult income</option>
+                    </select>
+                    
+                    <!-- Select Dataset Button-->
+                    <button type="submit" class="btn btn-primary w-100 d-block">Select</button>
+                    
+                </form>
+            </div>
+        </div>
+
+        <div class="border p-3 shadow-sm">
+            
+
+            <center> 
+                <h5>Nominal Variables</h5>
+            </center> 
+            
+            <!-- list View  -->
+            <ul class="list-group mb-3" id="columnList"> </ul>
+            
+            <hr>
+            <form method="POST">
+                {% csrf_token %}
+                <!-- P Value Radio Selector -->
+                <div class="mb-3" style="display: flex; flex-direction: column; align-items: center;">  
+                    <label class="form-label">P-Value : </label>
+                </div>
+
+                <div class="mb-3" >  
+                    <div class="form-check form-check-inline">
+                        {{ form.inlineRadioOptions.0.tag }}
+                        <label class="form-check-label" for="{{ form.inlineRadioOptions.0.id_for_label }}">0.01</label>
+                    </div>
+            
+                    <div class="form-check form-check-inline">
+                        {{ form.inlineRadioOptions.1.tag }}
+                        <label class="form-check-label" for="{{ form.inlineRadioOptions.1.id_for_label }}">0.05</label>
+                    </div>
+            
+                    <div class="form-check form-check-inline">
+                        {{ form.inlineRadioOptions.2.tag }}
+                        <label class="form-check-label" for="{{ form.inlineRadioOptions.2.id_for_label }}">0.10</label>
+                    </div>
+                </div>
+
+                <!-- Causal Model Button-->
+                <button type="submit" class="btn btn-primary mb-3 w-100 d-block">Causal Model</button>
+            </form>
+            <button type="submit" class="btn btn-primary w-100 d-block">Debiased Dataset</button>
+        </div>
+
+    </div>
+    
+    <!-- Middle Column -->
+    <div class="col-md-6">
+        
+        <div class="border p-3 shadow-sm">
+            <h4>DAG</h4>
+            <hr>
+            
+            <!-- Cytoscape-Dagre visualization container -->
+            <div id="cy"></div>
+            
+            
+            <label class="form-check-label" for="sourceList"> Source : 
+                <div class="d-inline-block">
+                    <select class="form-select" aria-label="Default select example" id="sourceList" style="width: 175px" ></select>
+                </div>
+            </label>
+            <label class="form-check-label" for="targetList"> Target : 
+                <div class="d-inline-block">
+                    <select class="form-select" aria-label="Default select example" id="targetList" style="width: 175px"></select>
+                </div>
+            </label>
+            
+            <button type="button" class="btn btn-sm btn-light" id="create" title="Create Edge">
+                <i class='fa-solid fa-plus' style='font-size:36px'></i>   
+            </button>
+
+            <button type="button" class="btn btn-sm btn-light" id="delete" title="Delete Edge">
+                <i class= 'fa-solid fa-remove' style='font-size:36px'></i>   
+            </button>
+
+            <button type="button" class="btn btn-sm btn-light" id="reverse" title="Reverse Edge">
+                <i class='fa-solid fa-exchange-alt' style='font-size:36px'></i>   
+            </button>
+
+            <button type="button" class="btn btn-sm btn-light" id="direct" title="Direct Edge">
+                <i class='fa-solid fa-arrow-right-long' style='font-size:36px'></i>
+            </button>
+
+            <label class="form-check-label"> Mode : 
+                
+                <input type="radio" class="btn-check" name="mode-toggle" id="refine" autocomplete="off" checked=""/>
+                    <label class="btn btn-outline-primary" for="refine">Refine</label>
+
+                <input type="radio" class="btn-check" name="mode-toggle" id="debias" autocomplete="off" />
+                    <label class="btn btn-outline-success" for="debias">Debias</label>
+            
+            </label>
+
+    
+            
+        </div>
+    
+    
+    </div>
+
+    <!-- Right Column 1 -->
+    <div class="col-md-2">
+        <div class="border p-3 shadow-sm">
+
+
+            <form id="evaluateBiasForm" method="POST" action="{% url 'evaluate_bias' %}">
+                {% csrf_token %}
+                
+                <!-- First Dropdown -->
+                <div class="mb-2  text-center" >
+                    <label class="form-label"> Bias Variable : </label>
+                    <select id="bias_variable" class="form-select" aria-label="Default select example"> </select>
+                </div>
+            
+                <!-- Second Dropdown -->
+                <div class="mb-2 text-center" >
+                    <label class="form-label"> Target Variable : </label>
+                    <select id="target_variable" class="form-select" aria-label="Default select example"> </select>
+                </div>
+            
+                <!-- Evaluate Bias Button -->
+                <button type="submit" name="evaluate_bias_button" id="evaluateBiasBtn" class="btn btn-primary w-100 d-block mt-3">Evaluate Bias</button>
+            </form>
+
+        </div>
+        <!-- Display area for JSON response -->
+        <!-- <div id="jsonResponse"></div> -->
+
+        <div class="border p-3 shadow-sm">
+            <center> 
+                <h5>ML Metrics</h5> 
+            </center>
+            
+            <!-- Bar chart canvas -->
+            <div id='mlMetricsDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
+
+            <hr>
+
+            <center> 
+                <h5>Data Distortion</h5>
+            </center> 
+
+            <div id='dataDistortionDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
+            
+            
+        </div>
+
+    </div>
+    
+
+    <!-- Right Column 2 -->
+    <div class="col-md-2">
+        
+        <!-- Display area for JSON response -->
+        <div id="jsonResponse"></div>
+
+        <div class="border p-3 shadow-sm">
+            <center> 
+                <h4>Before Bias</h4> 
+            </center>
+            
+            Pie charts
+
+            <hr>
+
+            <center> 
+                <h4>After Bias</h4> 
+            </center>
+            
+            Pie charts
+        </div>
+
+    </div>
+
+</div>
+    
+
+
+
+
+{% endblock %}
